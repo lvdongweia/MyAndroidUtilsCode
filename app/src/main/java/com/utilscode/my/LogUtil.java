@@ -1,6 +1,5 @@
 package com.utilscode.my;
 
-import android.content.Context;
 import android.util.Log;
 
 
@@ -12,6 +11,11 @@ import android.util.Log;
  */
 public class LogUtil {
     private static final String TAG = "MyDemoApp";
+
+    /**
+     * Log最大长度
+     */
+    private static final int LOG_MAX_LEN = 3000;
 
     /**
      * Log开关
@@ -30,62 +34,84 @@ public class LogUtil {
 
     public static void v(String tag, String msg) {
         if (isDebug(Log.VERBOSE)) {
-            if (CLASS_TAG) {
-                Log.v(tag, msg);
+            if (msg.length() > LOG_MAX_LEN) {
+                printLongMsg(Log.VERBOSE, tag, msg);
             } else {
-                Log.v(TAG, formatMsg(tag, msg));
+                printMsg(Log.VERBOSE, tag, msg);
             }
         }
     }
 
     public static void d(String tag, String msg) {
-        if (isDebug(Log.VERBOSE)) {
-            if (CLASS_TAG) {
-                Log.d(tag, msg);
+        if (isDebug(Log.DEBUG)) {
+            if (msg.length() > LOG_MAX_LEN) {
+                printLongMsg(Log.DEBUG, tag, msg);
             } else {
-                Log.d(TAG, formatMsg(tag, msg));
+                printMsg(Log.DEBUG, tag, msg);
             }
         }
     }
 
     public static void i(String tag, String msg) {
-        if (isDebug(Log.VERBOSE)) {
-            if (CLASS_TAG) {
-                Log.i(tag, msg);
+        if (isDebug(Log.INFO)) {
+            if (msg.length() > LOG_MAX_LEN) {
+                printLongMsg(Log.INFO, tag, msg);
             } else {
-                Log.i(TAG, formatMsg(tag, msg));
+                printMsg(Log.INFO, tag, msg);
             }
         }
     }
 
     public static void w(String tag, String msg) {
-        if (isDebug(Log.VERBOSE)) {
-            if (CLASS_TAG) {
-                Log.w(tag, msg);
+        if (isDebug(Log.WARN)) {
+            if (msg.length() > LOG_MAX_LEN) {
+                printLongMsg(Log.WARN, tag, msg);
             } else {
-                Log.w(TAG, formatMsg(tag, msg));
+                printMsg(Log.WARN, tag, msg);
             }
         }
     }
 
     public static void e(String tag, String msg) {
-        if (isDebug(Log.VERBOSE)) {
-            if (CLASS_TAG) {
-                Log.e(tag, msg);
+        if (isDebug(Log.ERROR)) {
+            if (msg.length() > LOG_MAX_LEN) {
+                printLongMsg(Log.ERROR, tag, msg);
             } else {
-                Log.e(TAG, formatMsg(tag, msg));
+                printMsg(Log.ERROR, tag, msg);
             }
         }
     }
 
     public static void printThrowable(String tag, Throwable tr) {
-        if (isDebug(Log.ERROR)) {
-            if (CLASS_TAG) {
-                Log.e(tag, Log.getStackTraceString(tr));
+        if (isDebug(Log.DEBUG)) {
+            String msg = Log.getStackTraceString(tr);
+            if (msg.length() > LOG_MAX_LEN) {
+                printLongMsg(Log.ERROR, tag, msg);
             } else {
-                Log.e(TAG, formatMsg(tag, Log.getStackTraceString(tr)));
+                printMsg(Log.ERROR, tag, msg);
             }
         }
+    }
+
+    private static void printMsg(int priority, String tag, String msg) {
+        String relTag = CLASS_TAG ? tag : TAG;
+        String relMsg = CLASS_TAG ? msg : formatMsg(tag, msg);
+
+        Log.println(priority, relTag, relMsg);
+    }
+
+    private static void printLongMsg(int priority, String tag, String msg) {
+        final int len = msg.length();
+        int start = 0;
+        int end = LOG_MAX_LEN;
+
+        while (end < len) {
+            printMsg(priority, tag, msg.substring(start, end));
+            start = end;
+            end += LOG_MAX_LEN;
+        }
+
+        printMsg(priority, tag, msg.substring(start));
     }
 
     private static String formatMsg(String tag, String msg) {
@@ -97,5 +123,4 @@ public class LogUtil {
     private static boolean isDebug(int level) {
         return (level >= DEBUG_LEVEL) && DEBUG;
     }
-
 }
